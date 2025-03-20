@@ -9,7 +9,7 @@ company = st.text_input("Enter Company Name")
 if st.button("Get News"):
     with st.spinner("Connecting to API server..."):
         try:
-            response = requests.get(f"http://0.0.0.0:8000/get_news/?company={company}", timeout=30)
+            response = requests.get(f"http://127.0.0.1:8000/get_news/?company={company}", timeout=30)
             
             if response.status_code == 200:
                 data = response.json()
@@ -39,7 +39,7 @@ if st.button("Get News"):
             else:
                 st.error(f"Error fetching data: HTTP {response.status_code}")
         except requests.exceptions.ConnectionError:
-            st.error("Could not connect to the API server. Please make sure it's running at http://0.0.0.0:8000")
+            st.error("Could not connect to the API server. Please make sure it's running at http://127.0.0.1:8000")
         except requests.exceptions.Timeout:
             st.error("Connection to API server timed out. The request might be taking too long to process.")
         except Exception as e:
