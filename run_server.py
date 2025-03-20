@@ -33,7 +33,7 @@ def start_api_server(port=8000):
     if is_port_in_use(port):
         print(f"Port {port} is already in use.")
         if terminate_process_on_port(port):
-            time.sleep(1) #give time to terminate
+            time.sleep(1)  # Give time to terminate
             if is_port_in_use(port):
                 print(f"Failed to terminate process on port {port}. Exiting.")
                 return None
@@ -59,16 +59,9 @@ def start_api_server(port=8000):
     return api_process
 
 def start_streamlit():
+    """Starts Streamlit app in the main thread."""
     print("Starting Streamlit app...")
-    streamlit_process = subprocess.Popen(
-        ["streamlit", "run", "app.py"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    )
-
-    # Print Streamlit output
-    for line in iter(streamlit_process.stdout.readline, b''):
-        print(f"Streamlit: {line.decode('utf-8').strip()}")
+    subprocess.run(["streamlit", "run", "app.py"])
 
 # Main script
 if __name__ == "__main__":
@@ -76,15 +69,13 @@ if __name__ == "__main__":
     api_process = start_api_server()
 
     if api_process is None:
-        exit(1) #exit if api server did not start
+        exit(1)  # Exit if API server did not start
 
-    # Start Streamlit in a separate thread
-    streamlit_thread = threading.Thread(target=start_streamlit)
-    streamlit_thread.daemon = True
-    streamlit_thread.start()
+    # Start Streamlit in the main thread
+    start_streamlit()
 
     try:
-        # Keep the main process running
+        # Keep the main process running (needed for API server)
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
