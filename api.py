@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from utils import get_news_urls, extract_article_details, analyze_sentiment, compare_sentiments, generate_tts
+import uvicorn
 
 app = FastAPI()
 
@@ -28,4 +29,4 @@ def get_news(company: str):
     }
 
 if __name__ == "__main__":
-     app.run(debug=True, host="0.0.0.0", port=5000)
+    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
