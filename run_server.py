@@ -12,10 +12,10 @@ def is_port_in_use(port: int) -> bool:
 
 def terminate_process_on_port(port: int):
     """Terminates processes listening on the given port."""
-    for proc in psutil.process_iter(['pid', 'connections']):
+    for proc in psutil.process_iter(['pid', 'connections', 'addr']): #add addr to process_iter
         try:
-            connections = proc.info['connections']
-            if connections:
+            if 'connections' in proc.info and proc.info['connections']: #check if connections attribute exists
+                connections = proc.info['connections']
                 for conn in connections:
                     if conn.laddr.port == port:
                         print(f"Terminating process {proc.info['pid']} using port {port}")
@@ -23,10 +23,11 @@ def terminate_process_on_port(port: int):
                         process.terminate()
                         process.wait()  # Wait for process termination
                         return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass  # Ignore exceptions if process no longer exists
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, KeyError): #add KeyError
+            pass  # Ignore exceptions if process no longer exists or attribute is missing
 
     return False
+
 
 def start_api_server(port=8000):
     """Starts FastAPI server after checking and terminating existing process on port."""
