@@ -1,0 +1,14 @@
+requests
+beautifulsoup4
+newspaper3k
+nltk
+pandas
+matplotlib
+openai
+gradio
+streamlit
+fastapi
+uvicorn
+torch
+transformers
+gtts
