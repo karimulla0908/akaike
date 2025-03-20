@@ -29,6 +29,7 @@ def terminate_process_on_port(port: int):
     return False
 
 
+
 def start_api_server(port=8000):
     """Starts FastAPI server after checking and terminating existing process on port."""
     if is_port_in_use(port):
