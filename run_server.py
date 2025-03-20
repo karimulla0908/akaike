@@ -1,60 +1,46 @@
 import subprocess
 import time
 import os
-import sys
 import threading
-import socket
-import requests
 
-def is_port_in_use(port):
-    """Check if a port is in use"""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
-
-def wait_for_api_server(timeout=30):
-    """Wait for the API server to be ready"""
-    start_time = time.time()
-    while time.time() - start_time < timeout:
-        try:
-            response = requests.get("http://0.0.0.0:8000/docs")
-            if response.status_code == 200:
-                print("FastAPI server is ready!")
-                return True
-        except requests.exceptions.ConnectionError:
-            pass
-        time.sleep(1)
-        print("Waiting for FastAPI server to start...")
+def start_api_server():
+    print("Starting FastAPI server...")
+    api_process = subprocess.Popen(["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"], 
+                                  stdout=subprocess.PIPE)
     
-    print("Timed out waiting for FastAPI server")
-    return False
-
-def run_fastapi(port=8000):
-    """Run the FastAPI server"""
-    if is_port_in_use(port):
-        print(f"Port {port} is already in use. Assuming FastAPI is already running.")
-        return
+    # Wait for server to start
+    for line in iter(api_process.stdout.readline, b''):
+        line_text = line.decode('utf-8').strip()
+        print(f"API: {line_text}")
+        if "Application startup complete" in line_text:
+            print("API server is ready!")
+            break
     
-    print(f"Starting FastAPI server on port {port}...")
-    subprocess.Popen(["uvicorn", "api:app", "--host", "0.0.0.0", "--port", str(port)])
+    return api_process
 
-def run_streamlit():
-    """Run the Streamlit app"""
+def start_streamlit():
     print("Starting Streamlit app...")
-    subprocess.run(["streamlit", "run", "app.py"])
-
-def main():
-    # Start FastAPI
-    port = 8000
-    run_fastapi(port)
+    streamlit_process = subprocess.Popen(["streamlit", "run", "app.py"],
+                                        stdout=subprocess.PIPE)
     
-    # Wait for FastAPI to start or detect if it's already running
-    if not is_port_in_use(port):
-        wait_for_api_server()
-    else:
-        print("FastAPI appears to be already running.")
-    
-    # Start Streamlit in the main thread
-    run_streamlit()
+    # Print Streamlit output
+    for line in iter(streamlit_process.stdout.readline, b''):
+        print(f"Streamlit: {line.decode('utf-8').strip()}")
 
+# Main script
 if __name__ == "__main__":
-    main()
+    # Start API server and wait for it to be ready
+    api_process = start_api_server()
+    
+    # Start Streamlit in a separate thread
+    streamlit_thread = threading.Thread(target=start_streamlit)
+    streamlit_thread.daemon = True
+    streamlit_thread.start()
+    
+    try:
+        # Keep the main process running
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Shutting down...")
+        api_process.terminate()
