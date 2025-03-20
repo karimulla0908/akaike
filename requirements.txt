@@ -12,3 +12,4 @@ uvicorn
 torch
 transformers
 gtts
+psutil
