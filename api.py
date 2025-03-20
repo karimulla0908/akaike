@@ -26,3 +26,6 @@ def get_news(company: str):
         "Sentiment Report": sentiment_report,
         "Audio": "output_hindi.mp3" if tts_file else "TTS Generation Failed"
     }
+
+if __name__ == "__main__":
+     app.run(debug=True, host="0.0.0.0", port=5000)
