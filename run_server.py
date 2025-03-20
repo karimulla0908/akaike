@@ -17,7 +17,7 @@ def start_api_server(port=8000):
 
     print(f"Starting FastAPI server on port {port}...")
     api_process = subprocess.Popen(
-        ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", str(port)],
+        ["uvicorn", "api:app", "--host", "127.0.0.1", "--port", str(port)],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT, #to capture error logs in the same pipe
     )
